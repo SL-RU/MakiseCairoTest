@@ -2,18 +2,19 @@ Examples and tests for GUI library MakiseGUI.
 
 https://github.com/SL-RU/MakiseGUI
 
-MakiseGUI - graphical library for embed applications. It's fully written on C and can be ported anywhere. This test uses SDL2 as frontback.
+MakiseGUI - graphical library for embed applications. It's fully written on C and can be ported anywhere. This test uses Cairo as primitives backend.
 
 Video: https://www.youtube.com/watch?v=OX_bcBR7teA
 
 # Requirements
-* SDL2
+* Cairo
+* GTK+-3.0
 
 # Build
 
 ```
-git clone https://github.com/SL-RU/MakiseSDLTest
-cd MakiseSDLTest/
+git clone https://github.com/SL-RU/MakiseCairoTest
+cd MakiseCairoTest/
 git submodule init
 git submodule update
 mkdir build; cd build

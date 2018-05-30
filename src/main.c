@@ -1,30 +1,15 @@
 #include <stdlib.h>
-#include <SDL2/SDL.h>
 #include <stdint.h>
 #include "makise.h"
 #include "makise_gui.h"
-#include "makise_sdl2.h"
+//#include "makise_sdl2.h"
 #include "tests.h"
-
-SDL_Renderer *renderer;
-SDL_Window *window;
-SDL_Surface *screen;
-
-MakiseGUI* mGui;
-MHost *host;
-MakiseGUI    Gu;
-MakiseBuffer Bu;
-MakiseDriver Dr;
-MHost hs;
-MContainer co;
-
-uint32_t bufff[960000] = {0};
-
-void start_m();
 
 int x = 0;
 int y = 0;
 char bu[100] = {0};
+
+extern MHost *host;
 
 //Define user keys
 #define M_KEY_USER_ESC        M_KEY_USER_0
@@ -63,188 +48,18 @@ MInputData inp_handler(MInputData d, MInputResultEnum res)
     }
     return (MInputData){0};
 }
+
 uint8_t prsed = 0;
-int main(void) {
-    SDL_Event event;
-
-    //init SDL
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(320, 240, 0, &window, &renderer);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    SDL_RenderClear(renderer);
-    screen = SDL_GetWindowSurface(window);
-
-    
+void makise_cairo_init(int argc, char *argv[]);
+void makise_cairo_start();
+int main(int argc, char *argv[] )
+{
     //init makise GUI & start
-    start_m();
-
-    
-    while (1) {
-	//draw & predraw gui
-	makise_g_host_call(host, mGui, M_G_CALL_PREDRAW);
-	makise_g_host_call(host, mGui, M_G_CALL_DRAW);
-
-	//call driver
-	makise_sdl2_draw(mGui);
-
-	//update sdl
-	SDL_UpdateWindowSurface(window);
-
-	
-	//input system
-	if(SDL_WaitEventTimeout(&event, 50))
-	{
-	    do
-	    {
-		x = event.motion.x;
-		y = event.motion.y;
-
-		if(prsed)
-		{
-		    MInputData d;
-		    d.event = M_INPUT_PRESSING;
-		    d.key = M_KEY_CURSOR;
-		    d.time = 100;
-		    d.cursor.x = x;
-		    d.cursor.y = y;
-		    makise_gui_input_send(host, d);
-		}
-		switch(event.type)
-		{
-		case SDL_QUIT:
-		    SDL_DestroyRenderer(renderer);
-		    SDL_DestroyWindow(window);
-		    SDL_Quit();
-		    return EXIT_SUCCESS;
-		    break;
-		case SDL_MOUSEBUTTONDOWN:
-		    if(event.button.button == SDL_BUTTON_LEFT)
-		    {
-			//printf("down\n");
-			prsed = 1;
-			MInputData d;
-			d.event = M_INPUT_PRESSING;
-			d.key = M_KEY_CURSOR;
-			d.time = 100;
-			d.cursor.x = x;
-			d.cursor.y = y;
-			makise_gui_input_send(host, d);
-		    }
-		    break;
-		case SDL_MOUSEBUTTONUP:
-		    if(event.button.button == SDL_BUTTON_LEFT &&
-			prsed)
-		    {
-			//printf("up\n");
-			prsed = 0;
-			MInputData d;
-			d.event = M_INPUT_CLICK;
-			d.key = M_KEY_CURSOR;
-			d.time = 100;
-			d.cursor.x = x;
-			d.cursor.y = y;
-			makise_gui_input_send(host, d);
-		    }
-		    break;
-		    /*Arrows - arrows
-		      Tab - switch tabs or focus
-		      Return - OK
-		      Minus/Equals - switch focus
-		      Esc - exit from test
-		      Delete - print tree of elements
-		     */
-		case SDL_KEYDOWN:
-		    switch (event.key.keysym.sym)
-		    {
-		    case SDLK_LEFT:
-			makise_gui_input_send_button(host,
-						     M_KEY_LEFT,
-						     M_INPUT_CLICK, 100);
-			break;
-		    case SDLK_RIGHT:
-			makise_gui_input_send_button(host,
-						     M_KEY_RIGHT,
-						     M_INPUT_CLICK, 100);
-			break;
-		    case SDLK_UP:
-			makise_gui_input_send_button(host,
-						     M_KEY_UP,
-						     M_INPUT_CLICK, 100);
-			break;
-		    case SDLK_DOWN:
-			makise_gui_input_send_button(host,
-						     M_KEY_DOWN,
-						     M_INPUT_CLICK, 100);
-			break;
-		    case SDLK_TAB:
-			makise_gui_input_send_button(host,
-						     M_KEY_TAB_NEXT,
-						     M_INPUT_CLICK, 100);
-			break;
-		    case SDLK_RETURN:
-			makise_gui_input_send_button(host,
-						     M_KEY_OK,
-						     M_INPUT_CLICK, 100);
-			break;
-
-			//DO NOT Interact with gui directly. It may cause errors in multithread applications. Use custom events
-		    case SDLK_DELETE:
-			makise_gui_input_send_button(host,
-						     M_KEY_USER_TREE,
-						     M_INPUT_CLICK, 100);
-
-			break;
-		    case SDLK_ESCAPE:
-			makise_gui_input_send_button(host,
-						     M_KEY_USER_ESC,
-						     M_INPUT_CLICK, 100);
-
-			break;
-		    case SDLK_EQUALS:
-			makise_gui_input_send_button(host,
-						     M_KEY_USER_FOCUS_NEXT,
-						     M_INPUT_CLICK, 100);
-
-			break;
-		    case SDLK_MINUS:
-			makise_gui_input_send_button(host,
-						     M_KEY_USER_FOCUS_PREV,
-						     M_INPUT_CLICK, 100);
-			break;
-		    }
-		    
-		}
-	    }
-	    while (SDL_PollEvent(&event));
-	    //perform input
-	    makise_gui_input_perform(host);
-	}
-    }
-}
-
-static uint32_t* _get_gui_buffer(uint32_t size)
-{
-    return bufff;
-}
-
-void start_m()
-{
-    MakiseGUI    * gu = &Gu;
-    MakiseDriver * dr = &Dr;
-    host = &hs;
-    
-
-    //init driver structure
-    makise_sdl2_driver(dr, 320, 240, screen);
-
-    makise_gui_autoinit(host,
-			gu, dr,
-			&_get_gui_buffer,
-			&inp_handler,
-			0, 0, 0);
-    
-    mGui = gu;
-    
-    //run tests
+    makise_cairo_init(argc, argv);
     tests_init(host);
+    
+    makise_cairo_start();
+    //start_m();
+    
 }
+

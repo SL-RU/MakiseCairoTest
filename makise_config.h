@@ -6,14 +6,28 @@
 #define MAKISE_DEBUG_OUTPUT printf
 
 //comment unused displays
-#define MAKISE_SDL2_USE 1
+//#define MAKISE_SDL2_USE 1
 //#define MAKISE_ILI9340_USE 1
 
+//Use if you want your own color type
+#define MAKISE_COLOR_CUSTOM_TYPE
+typedef struct {
+    uint8_t r : 8;
+    uint8_t g : 8;
+    uint8_t b : 8;
+    uint8_t a : 1;
+} MColor;
+#define MC_Transparent (MColor){0,0,0,1}
+#define MC_IS_Transparent(c) ((c.a) == 1)
 
-#define MAKISEGUI_DRIVER_DEPTH 16
-#define MAKISEGUI_BUFFER_DEPTH 16
-#define MAKISEGUI_BUFFER_DEPTHMASK 0b11111111111111111
+#define MC_Black (MColor){0,0,0,0}
+#define MC_White (MColor){255,255,255,0}
+#define MC_Gray  (MColor){120,120,120,0}
 
+//#define MAKISE_PRIMITIVES_DRAWER_DEFAULT 
+//#define MAKISEGUI_DRIVER_DEPTH 16
+//#define MAKISEGUI_BUFFER_DEPTH 16
+//#define MAKISEGUI_BUFFER_DEPTHMASK 0b11111111111111111
 
 #define MAKISE_BUF_H 64
 #define MAKISE_BUF_W 128
