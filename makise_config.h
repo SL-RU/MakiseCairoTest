@@ -29,8 +29,8 @@ typedef struct {
 //#define MAKISEGUI_BUFFER_DEPTH 16
 //#define MAKISEGUI_BUFFER_DEPTHMASK 0b11111111111111111
 
-#define MAKISE_BUF_H 64
-#define MAKISE_BUF_W 128
+//#define MAKISE_BUF_H 64
+//#define MAKISE_BUF_W 128
 
 //Control section
 //len of buffer with input events

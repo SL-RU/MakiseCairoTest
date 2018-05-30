@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 enable_language(C)
 
-project(MakiseSDL C)
+project(MakiseCairoTest C)
 
 #USER CUSTOM SETTINGS
 set(OPT "-Ofast")
@@ -12,7 +12,6 @@ set(USER_CFLAGS "")
 add_definitions(-DIS_STM32=1)
 
 #Libraries
-# includes cmake/FindSDL2.cmake
 INCLUDE(FindPkgConfig)
 PKG_SEARCH_MODULE(CAIRO REQUIRED cairo)
 INCLUDE_DIRECTORIES(${CAIRO_INCLUDE_DIRS})

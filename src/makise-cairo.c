@@ -16,39 +16,6 @@ static cairo_t * cr_current = 0;
 
 static void point(cairo_t *cr, int x, int y, MColor c);
 
-/* Function that take input as Control Point x_coordinates and 
-Control Point y_coordinates and draw bezier curve */
-void bezierCurve(int x[] , int y[])
-{
-    int steps = 10;
-    for(int i = 0; i < 4; i++) {
-        point(cr_current, (int)x[i], (int)y[i], (MColor){0,255,0,0});
-    }
-    cairo_set_source_rgb(cr_current, 255, 0, 255);
-    cairo_move_to (cr_current, x[0], y[0]);
-    cairo_set_line_width(cr_current, 2);
-    int64_t xu = 0 , yu = 0 , u = 0 ;
-    int i = 0 ;
-    for(u = 0 ; u <= steps ; u += 1)
-    {
-        xu = (1-u)*(1-u)*(1-u)    * x[0] * steps 
-            + 3 * u * (1-u)*(1-u) * x[1] * steps
-            + 3 * u * u * (1-u)   * x[2] * steps
-            + u * u * u           * x[3] * steps;
-        
-        yu = (1-u)*(1-u)*(1-u)    * y[0] * steps
-            + 3 * u * (1-u)*(1-u) * y[1] * steps
-            + 3 * u * u * (1-u)   * y[2] * steps
-            + u * u * u           * y[3] * steps;
-        cairo_line_to (cr_current,
-                       xu / (steps * steps * steps * steps),
-                       yu / (steps * steps * steps * steps));
-        //cairo_line_to (cr_current, xu, yu);
-    }
-    cairo_line_to (cr_current, x[3], y[3]);
-    cairo_stroke(cr_current);
-}
-
 static void do_drawing(GtkWidget* widget, cairo_t *);
 
 static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, 
@@ -86,8 +53,6 @@ static void do_drawing(GtkWidget* widget, cairo_t *cr)
 
     /* cairo_show_text(cr, "Disziplin ist Macht."); */
 
-    bezierCurve((int[4]){20, 100, 80, 200}, (int[4]){20, 100, 100, 40});
-    
     makise_gui_input_perform(host);
     cr_current = 0;
 
