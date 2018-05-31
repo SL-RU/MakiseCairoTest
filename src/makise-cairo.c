@@ -33,25 +33,9 @@ static void do_drawing(GtkWidget* widget, cairo_t *cr)
     cairo_paint(cr);
     
     GtkWidget* window = gtk_widget_get_toplevel(widget);
-    //gtk_window_get_size(GTK_WINDOW(window), &width, &height);
 
-    //printf("redraw\n");
     makise_g_host_call(host, mGui, M_G_CALL_PREDRAW);
     makise_g_host_call(host, mGui, M_G_CALL_DRAW);
-    
-    /* cairo_set_source_rgb(cr, 255, 255, 255); */
-    /* cairo_set_line_width(cr, 1); */
-    /* cairo_rectangle(cr, 10, 20, 100, 50); */
-    /* cairo_stroke(cr); */
-    /* cairo_rectangle(cr, 10, 20, 100, 50); */
-    /* cairo_clip(cr); */
-    /* cairo_move_to(cr, 10.0, 50.0); */
-    /* cairo_set_source_rgb(cr, 255, 0, 0); */
-    /* cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, */
-    /*                        CAIRO_FONT_WEIGHT_NORMAL); */
-    /* cairo_set_font_size(cr, 40.0); */
-
-    /* cairo_show_text(cr, "Disziplin ist Macht."); */
 
     makise_gui_input_perform(host);
     cr_current = 0;
@@ -60,7 +44,7 @@ static void do_drawing(GtkWidget* widget, cairo_t *cr)
 }
 
 static gboolean clicked(GtkWidget *widget, GdkEventButton *event,
-    gpointer user_data)
+                        gpointer user_data)
 {
 
     MInputData d = {0};
@@ -101,7 +85,7 @@ void makise_cairo_init(int argc, char *argv[])
 
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_window_set_default_size(GTK_WINDOW(window), 320, 240); 
-    gtk_window_set_title(GTK_WINDOW(window), "GTK window");
+    gtk_window_set_title(GTK_WINDOW(window), "MakiseGUI Cairo backend test");
 
 
     MakiseDriver *d = &Dr;
@@ -127,6 +111,14 @@ void makise_cairo_start()
     gtk_main();
 }
 
+static void set_borders(const MakiseBuffer *b) {
+    cairo_reset_clip(cr_current);
+    cairo_set_source_rgb(cr_current, 255, 255, 255);
+    cairo_set_line_width(cr_current, 1);
+    cairo_rectangle(cr_current, b->border.x, b->border.y, b->border.w, b->border.h);
+    cairo_clip(cr_current);
+}
+
 static void clear(cairo_t *cr, MColor c)
 {
     cairo_set_source_rgb(cr, c.r, c.g, c.b);
@@ -150,7 +142,7 @@ static void rect(cairo_t *cr, int x, int y,
     cairo_rectangle(cr, x, y, w, h);
     cairo_fill(cr);
     cairo_set_source_rgb(cr, c.r, c.g, c.b);
-    cairo_set_line_width(cr, 2);
+    cairo_set_line_width(cr, t);
     cairo_rectangle(cr, x, y, w, h);
     cairo_stroke(cr);
 }
@@ -185,10 +177,133 @@ static void triangle(cairo_t *cr,
     
 }
 
+static void d_char              ( const MakiseBuffer *b,
+                                  uint16_t ch,
+                                  int16_t x, int16_t y,
+                                  const MakiseFont* font,
+                                  MColor c )
+{
+    set_borders(b);
+    /* cairo_move_to(cr, 10.0, 50.0); */
+    /* cairo_set_source_rgb(cr, 255, 0, 0); */
+    /* cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, */
+    /*                        CAIRO_FONT_WEIGHT_NORMAL); */
+    /* cairo_set_font_size(cr, 40.0); */
+
+    //cairo_show_text(cr, "Disziplin ist Macht.");
+    cairo_move_to(cr_current, x, y);
+    cairo_set_source_rgb(cr_current, c.r, c.g, c.b);
+    cairo_select_font_face(cr_current, "Sans", CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr_current, font->height);
+
+    cairo_show_text(cr_current, (char*)&ch);
+
+}
+static void string              ( const MakiseBuffer *b,
+                                  const char *s,
+                                  uint32_t len,
+                                  int16_t x, int16_t y,
+                                  MDTextPlacement place,
+                                  const MakiseFont* font,
+                                  MColor c)
+{
+    set_borders(b);
+
+    cairo_text_extents_t extents;
+    
+    cairo_set_source_rgb(cr_current, c.r, c.g, c.b);
+    cairo_select_font_face(cr_current, "Sans", CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr_current, font->height);
+
+    cairo_text_extents (cr_current, s, &extents);
+    if(place == MDTextPlacement_Center) {
+        x = x-(extents.width/2 + extents.x_bearing);
+        y = y-(extents.height/2 + extents.y_bearing);
+    } else if(place == MDTextPlacement_LeftUp) {
+        x = x-(extents.width + extents.x_bearing);
+        y = y-(extents.height + extents.y_bearing);
+    } else if(place == MDTextPlacement_CenterDown) {
+        x = x-(extents.width/2 + extents.x_bearing);        
+    } else if(place == MDTextPlacement_CenterUp) {
+        x = x-(extents.width/2 + extents.x_bearing);
+        y = y-(extents.height + extents.y_bearing);
+    }
+    cairo_move_to(cr_current, x, y);
+
+    cairo_show_text(cr_current, s);
+}
+static void string_frame        ( const MakiseBuffer *b,
+                                  const char *s,
+                                  uint32_t len,
+                                  int16_t x, int16_t y,
+                                  uint16_t w, uint16_t h,
+                                  const MakiseFont *font,
+                                  uint16_t line_spacing,
+                                  MColor c )
+{
+    set_borders(b);
+    cairo_rectangle(cr_current, x, y, w, h);
+    cairo_clip(cr_current);
+    cairo_move_to(cr_current, x, y);
+    cairo_set_source_rgb(cr_current, c.r, c.g, c.b);
+    cairo_select_font_face(cr_current, "Sans", CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr_current, font->height);
+
+    cairo_show_text(cr_current, s);
+}
+static uint32_t get_width       ( const MakiseBuffer *b,
+                                  const char* s,
+                                  uint32_t len,
+                                  const MakiseFont* font )
+{
+    return 0;
+}
+static uint32_t get_line_count  ( const MakiseBuffer *b,
+                                  const char *s,
+                                  uint32_t len,
+                                  uint16_t w,
+                                  const MakiseFont *font )
+{
+    return 0;
+}
+static char*    get_line        ( const MakiseBuffer *b,
+                                  char *s,
+                                  uint32_t len,
+                                  uint32_t n,
+                                  uint16_t w,
+                                  const MakiseFont *font)
+{
+    return s;
+}
+static uint32_t get_height      ( const MakiseBuffer *b,
+                                  const char*             s,
+                                  uint32_t          len,
+                                  uint16_t          width_window,
+                                  const MakiseFont* font,
+                                  uint32_t          font_line_spacing)
+{
+    return 0;
+}
+
+MakiseTextDrawer mtd = {
+    .d_char = &d_char,
+    .string = &string,
+    .string_frame = &string_frame,
+    .get_width = &get_width,
+    .get_line_count = &get_line_count,
+    .get_line = &get_line,
+    .get_height = &get_height
+};
+
 MResult cairo_drawer(const MakiseBuffer *b, const MDPrimitive *p) {
     if(b == 0 || p == 0)
         return M_ZERO_POINTER;
 
+    set_borders(b);
+    
     switch(p->type) {
     case MP_Clear: clear(cr_current, p->color); break;
     case MP_Point: point(cr_current,
@@ -223,7 +338,8 @@ MResult cairo_drawer(const MakiseBuffer *b, const MDPrimitive *p) {
         break;                        
     default: break;
     }
-    
+    cairo_reset_clip(cr_current);
+
     return M_OK;
 }
 
@@ -244,7 +360,7 @@ void start_m()
 			gu, dr,
 			&_get_gui_buffer,
 			&inp_handler,
-			0, 0, 0, &cairo_drawer);
+			0, 0, 0, &cairo_drawer, &mtd);
     
     mGui = gu;
 }

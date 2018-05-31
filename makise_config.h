@@ -23,6 +23,7 @@ typedef struct {
 #define MC_Black (MColor){0,0,0,0}
 #define MC_White (MColor){255,255,255,0}
 #define MC_Gray  (MColor){120,120,120,0}
+#define MC_Green (MColor){0,255,0,0}
 
 //#define MAKISE_PRIMITIVES_DRAWER_DEFAULT 
 //#define MAKISEGUI_DRIVER_DEPTH 16
