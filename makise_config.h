@@ -12,18 +12,18 @@
 //Use if you want your own color type
 #define MAKISE_COLOR_CUSTOM_TYPE
 typedef struct {
-    uint8_t r : 8;
-    uint8_t g : 8;
-    uint8_t b : 8;
+    float r;
+    float g;
+    float b;
     uint8_t a : 1;
 } MColor;
 #define MC_Transparent (MColor){0,0,0,1}
 #define MC_IS_Transparent(c) ((c.a) == 1)
 
 #define MC_Black (MColor){0,0,0,0}
-#define MC_White (MColor){255,255,255,0}
-#define MC_Gray  (MColor){120,120,120,0}
-#define MC_Green (MColor){0,255,0,0}
+#define MC_White (MColor){1,1,1,0}
+#define MC_Gray  (MColor){0.5,0.5,0.5,0}
+#define MC_Green (MColor){0,1,0,0}
 
 //#define MAKISE_PRIMITIVES_DRAWER_DEFAULT 
 //#define MAKISEGUI_DRIVER_DEPTH 16
@@ -76,10 +76,18 @@ typedef struct {
 #endif
 
 // FONTS. Uncomment to use
-#define MAKISE_FONTS_DEFAULT10X20
-#define MAKISE_FONTS_DEFAULT8X13
-#define MAKISE_FONTS_DEFAULT6X10
-#define MAKISE_FONTS_DEFAULT5X7
+/* #define MAKISE_FONTS_DEFAULT10X20 */
+/* #define MAKISE_FONTS_DEFAULT8X13 */
+/* #define MAKISE_FONTS_DEFAULT6X10 */
+/* #define MAKISE_FONTS_DEFAULT5X7 */
+
+/* Declare own fonts. Defined in the cairo-fonts.c.
+It can be done anywhere. */
+typedef struct _MakiseFont MakiseFont;
+extern const MakiseFont F_Default5x7;
+extern const MakiseFont F_Default6x10;
+extern const MakiseFont F_Default8x13;
+extern const MakiseFont F_Default10x20;    
 
 
 #ifdef MAKISE_ILI9340_USE
